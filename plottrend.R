@@ -1,10 +1,10 @@
-library(gapminder)
-library(ggplot2)
 
-plottrend <- function(){
+
+plottrend <- function(dir
+                      ){
   
   # start of TrendPlot
-  annual_aggregate <- read.csv("data/annual_aggregate.csv")
+  annual_aggregate <- read.csv(paste(dir, "annual_aggregate.csv", sep = ""))
   pdf <- melt(annual_aggregate, id.vars = "Year")
   lm1 <- lm(ET ~ Year, annual_aggregate)
   lm2 <- lm(GPP ~ Year, annual_aggregate)

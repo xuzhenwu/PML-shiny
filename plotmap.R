@@ -1,10 +1,8 @@
-library(raster)
-library(leaflet)
-library(RColorBrewer)
-library(reshape2)
-library(plotly)
 
-plotmap <- function(varname){
+
+plotmap <- function(dir,
+                    varname,
+                    aggregate_inx){
   
   palette <- c("Spectral", "YlGn")
   
@@ -15,8 +13,10 @@ plotmap <- function(varname){
      
   pals <- brewer.pal(9, pals)
   
-  fn <- paste("data/", varname, ".tif", sep = "")
+  fn <- paste(dir, varname, ".tif", sep = "")
   r <- raster(fn)
+  
+  r <- aggregate(r, fact = aggregate_inx, fun = mean)
   
   pal <- colorNumeric(pals, values(r),
                       na.color = "transparent")
