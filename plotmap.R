@@ -2,7 +2,7 @@
 
 plotmap <- function(dir,
                     varname,
-                    aggregate_inx){
+                    resolution){
   
   palette <- c("Spectral", "YlGn")
   
@@ -16,6 +16,7 @@ plotmap <- function(dir,
   fn <- paste(dir, varname, ".tif", sep = "")
   r <- raster(fn)
   
+  aggregate_inx <- ceiling(as.numeric(resolution) / 10)
   r <- aggregate(r, fact = aggregate_inx, fun = mean)
   
   pal <- colorNumeric(pals, values(r),

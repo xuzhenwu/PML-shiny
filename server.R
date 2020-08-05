@@ -1,3 +1,16 @@
+library(shiny)
+library(leaflet)
+library(raster)
+library(rgdal)
+library(leaflet)
+library(RColorBrewer)
+library(reshape2)
+library(plotly)
+library(gapminder)
+library(ggplot2)
+library(rsconnect)
+library(shinyFiles)
+
 # Define server logic required to draw a histogram ----
 server <- function(input, output) {
   
@@ -9,11 +22,13 @@ server <- function(input, output) {
   output$plotmap <- renderLeaflet({
     plotmap(input$dir,
             input$varname_map,
-            input$resolution/10)
+            input$resolution)
   })
   
   output$plottrend <- renderPlotly({
-    plottrend(input$dir)
+    plottrend(input$dir,
+              input$lon, 
+              input$lat)
   })
   
 }

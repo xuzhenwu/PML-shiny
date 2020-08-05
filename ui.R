@@ -11,21 +11,27 @@ library(ggplot2)
 library(rsconnect)
 library(shinyFiles)
 
-# Define UI for app that draws a histogram ----
+
 ui <- fluidPage(
   
-  # App title ----
+ 
   titlePanel("北京城区水热通量应用分析程序"),
-  
-  # Sidebar layout with input and output definitions ----
+  # sidebarLayout(sidebarPanel(),
+  #               mainPanel()),
+                
   sidebarLayout(
     
-    # Sidebar panel for inputs ----
+    
+    #=========================================================================
+    # 1. sider bar panel for inputs
+    #=========================================================================
+    
     sidebarPanel(
+      width = 3,
       
       textAreaInput("dir", 
                     "键入数据库目录", 
-                    value = "F:/beijing_urban/data/",
+                    value = "data/",
                     rows = 2),
       
       selectInput(inputId = "varname_map",
@@ -37,43 +43,62 @@ ui <- fluidPage(
                   min = 10,
                   max = 100,
                   step = 10,
-                  value = 30),
+                  value = 50),
       
-      
-      # Input: Numeric entry for number of obs to view ----
       dateRangeInput("holiday", "固定站点趋势分析的时间段"),
       
-      fluidRow(column(5,
-                      numericInput(inputId = "lat",
+      fluidRow(column(6,
+                      numericInput(inputId = "lon",
                                    label = "经度",
-                                   value = 120)
-      ),
-      column(5,
-             numericInput(inputId = "lon",
-                          label = "纬度",
-                          value = 38))
+                                   value = 120)),
+               column(6,
+                      numericInput(inputId = "lat",
+                                   label = "纬度",
+                                   value = 38))
       ),
       
       
       selectInput(inputId = "varname_trend",
                   label = "数据类型",
                   choices = c("ET", "GPP"),
-                  multiple = TRUE),
-      
-      fluidRow(
-        actionButton("click", "联系开发者", class = "btn-danger"),
-        actionButton("drink", "分享", class = "btn-lg btn-success")
-      )
+                  multiple = TRUE)
       
     ),
     
-    # Main panel for displaying outputs ----
+
     mainPanel(
+      width = 9,
       
-      leafletOutput(outputId = "plotmap"),
-      
-      plotlyOutput(outputId = "plottrend")
-      
+      sidebarLayout(
+        position = "right",
+        
+        
+        #=========================================================================
+        # 2. sider bar panel for outputs
+        #=========================================================================
+        
+        sidebarPanel(width = 4,
+                     
+                     fluidRow(
+                       actionButton("click", "联系开发者", class = "btn-danger"),
+                       actionButton("drink", "分享", class = "btn-lg btn-success")
+                     )
+                     
+        ),
+        
+        #=========================================================================
+        # 3. main panel for display data
+        #=========================================================================
+        mainPanel(
+          width = 8,
+          leafletOutput(outputId = "plotmap"),
+          
+          plotlyOutput(outputId = "plottrend")
+          
+        ) # end of main panel
+        
+        
+      )
     )
   )
 )
