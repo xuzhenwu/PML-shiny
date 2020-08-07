@@ -19,16 +19,27 @@ server <- function(input, output) {
   source("plotmap.R")
   
   
+  # 
   output$plotmap <- renderLeaflet({
-    plotmap(input$dir,
-            input$varname_map,
-            input$resolution)
+    
+    plotmap( input$dir,
+             input$varname_map,
+             input$resolution,
+             input$year,
+             input$month,
+             input$submonth,
+             input$lat,
+             input$lon,
+             input$dist)
   })
   
   output$plottrend <- renderPlotly({
     plottrend(input$dir,
-              input$lon, 
-              input$lat)
+              input$vars_trend,
+              input$lat,
+              input$lon,
+              input$dist
+              )
   })
   
 }
