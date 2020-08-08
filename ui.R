@@ -21,7 +21,7 @@ library(stringr)
 library(rhandsontable)
 
 choices_month <- format(seq.Date(from = as.Date("2013-01-01"), by = "month", length.out = 12*7), "%B-%Y")
-choices_var <- c("ET", "GPP", "LAI", "VPD", "Es", "Ei", "Ec", "landcover")
+choices_var <- c("ET", "GPP", "LAI", "VPD", "Es", "Ei", "Eca", "landcover")
 months <- c(paste("0", 1:9, sep = ""), 10:12)
 
 
@@ -64,7 +64,7 @@ ui <- fluidPage(
                selectInput(inputId = "month",
                            label = "月份",
                            choices = months,
-                           selected = 6
+                           selected = "06"
                )),
         column(4,
                selectInput(inputId = "submonth",
