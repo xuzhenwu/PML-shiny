@@ -11,32 +11,42 @@ plotmap <- function(
   lon,
   dist){
   
-  #dir <- "F:/dataset_pml/"
-  #varname = "ET"
-  #resolution = 50
-  #year  = 2013
-  #month = 6
-  #submonth = "a"
-  #lat = 40.001501
-  #lon = 116.379168
-  #dist = 500
+  dir <- "F:/pml_data/"
+  varname = "ET"
+  resolution = 50
+  year  = 2013
+  month = 6
+  submonth = "a"
+  lat = 40.001501
+  lon = 116.379168
+  dist = 500
 
   
-  # match file
-  fn_prefix <- paste(year, month, submonth, "_", sep = "")
   fn <- dir(dir, 
-            paste("*", fn_prefix, "*",sep = "")
+            paste(varname, ".*", year, sep = "")
             , full.names = TRUE)
   
   # palette
   palette <- c("Spectral", "YlGn")
   pals <- palette[1]
-  if(varname == "GPP")
+  if(varname == "GPP"|
+     varname == "LAI")
     pals <- palette[2]
   pals <- brewer.pal(9, pals)
   
+  
+  #==================================here
+  # compute layer
+  layer <- 1
+  if(str_detect(submonth, "a"))
+    layer <- 2
+  layer <- (as.numeric(month) - 1)*2 + layer
+    
+    
   # read raster file and aggreagate
-  r <- raster(fn, varname = varname)
+  r <- raster(fn, layer = layer)
+  
+  
   aggregate_inx <- ceiling(as.numeric(resolution) / 10)
   r <- aggregate(r, fact = aggregate_inx, fun = mean)
   
@@ -52,7 +62,7 @@ plotmap <- function(
   
   # leaflet
   p <- leaflet() %>% addTiles() %>%
-    addRasterImage(r, colors = pal, opacity = 0.8) %>%
+    addRasterImage(r, colors = pal, opacity = 0.85) %>%
     addPolygons(data = st_circle, color = "blue")%>%
     addLegend(pal = pal, values = values(r),
               title = "Value")

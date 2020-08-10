@@ -22,7 +22,7 @@ server <- function(input, output) {
   # 
   output$plotmap <- renderLeaflet({
     
-    plotmap( input$dir,
+     plotmap(input$dir,
              input$varname_map,
              input$resolution,
              input$year,
@@ -34,13 +34,24 @@ server <- function(input, output) {
   })
   
   output$plottrend <- renderPlotly({
-    plottrend(input$dir,
-              input$vars_trend,
-              input$lat,
-              input$lon,
-              input$dist
-              )
+    
+    # plottrend(input$dir,
+    #           input$vars_trend,
+    #           input$lat,
+    #           input$lon,
+    #           input$dist
+    #           )
   })
+  
+  output$trendinfo <- renderTable({
+    
+    fn <- paste(input$dir, "trend_info.csv", sep = "")
+    trendinfo <- read.csv(fn)
+    names(trendinfo)[1:4] <- c("变量", "多年平均值", "逐年趋势值", "p值")
+    trendinfo <- trendinfo
+    
+  })
+
   
 }
 

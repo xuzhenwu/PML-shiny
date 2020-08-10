@@ -1,29 +1,36 @@
-library(shiny)
-library(leaflet)
-library(raster)
-library(rgdal)
-library(leaflet)
-library(RColorBrewer)
-library(reshape2)
-library(plotly)
-library(gapminder)
-library(ggplot2)
-library(rsconnect)
-library(shinyFiles)
-library(shinyWidgets)
-library(lubridate)
-library(zoo)
-library(exactextractr)
-library(data.table)
-library(sf)
-library(ncdf4)
-library(stringr)
-library(rhandsontable)
+slibrary <- function(fun){
+  fun_name <- as.character(substitute(fun))
+  if(is.element(fun_name, installed.packages()[,1]) == FALSE)
+    install.packages(fun_name)
+  COMMAND <- paste("library(", fun_name, ")", sep = "")
+  eval(parse(text = COMMAND))
+}
+
+# dependences 
+slibrary(shiny)
+slibrary(leaflet)
+slibrary(raster)
+slibrary(rgdal)
+slibrary(leaflet)
+slibrary(RColorBrewer)
+slibrary(reshape2)
+slibrary(plotly)
+slibrary(gapminder)
+slibrary(ggplot2)
+slibrary(rsconnect)
+slibrary(shinyFiles)
+slibrary(shinyWidgets)
+slibrary(exactextractr)
+slibrary(data.table)
+slibrary(sf)
+slibrary(ncdf4)
+slibrary(stringr)
 
 choices_month <- format(seq.Date(from = as.Date("2013-01-01"), by = "month", length.out = 12*7), "%B-%Y")
-choices_var <- c("ET", "GPP", "LAI", "VPD", "Es", "Ei", "Eca", "landcover")
+choices_var <- c("Ec", "Es", "ET", "GPP", "landcover",
+                 "LE", "Rainf", "SWdown", "Tair", "VPD")
 months <- c(paste("0", 1:9, sep = ""), 10:12)
-
+file_location <- "F:/pml_data/"
 
 ui <- fluidPage(
   
@@ -45,7 +52,7 @@ ui <- fluidPage(
       h4(strong("键入数据库目录")),
       textAreaInput("dir", 
                     NULL, 
-                    value = "F:/dataset_pml/",
+                    value = file_location,
                     #value = "data/",
                     #value = "F:/PML2.0_NCL_Sentinel_LAI_15D_CASE01/",
                     rows = 2),
@@ -121,8 +128,12 @@ ui <- fluidPage(
       selectInput(inputId = "vars_trend",
                   label = "数据类型",
                   choices = choices_var,
-                  selected = c("ET", "GPP", "LAI"),
-                  multiple = TRUE)
+                  selected = c("ET", "GPP", "LAI", "Es", "Eca"),
+                  multiple = TRUE),
+      
+      h4(strong("趋势分析结果")),
+      
+      tableOutput("trendinfo"),
       
     ),
     
@@ -139,6 +150,7 @@ ui <- fluidPage(
         #=========================================================================
         
         sidebarPanel(width = 4,
+                     
                      
                      h4(strong("项目支持")),
                      
@@ -164,7 +176,7 @@ ui <- fluidPage(
           width = 8,
           leafletOutput(outputId = "plotmap", height = 450),
           
-          plotlyOutput(outputId = "plottrend", height = 600)
+          # plotlyOutput(outputId = "plottrend", height = 600)
           
         ) # end of main panel
         
