@@ -14,7 +14,7 @@ b. 打开**Rcode**文件夹，双击打开**PML-shiny.Rproj**项目文件
 
 c. 打开**install_packages.R**脚本，勾选左上角**source to save**选项，安装依赖项
 
-c. 打开在**ui.R**或**server.R**，点击右上角**Run App**，在弹出窗口调全屏运行
+c. 打开在**ui.R**或**server.R**，点击右上角**Run App**，在弹出窗口点击**open in browser**在浏览器中运行
 
 ## 2 功能和界面
 

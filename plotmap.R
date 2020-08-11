@@ -11,21 +11,21 @@ plotmap <- function(
   lon,
   dist){
   
-  dir <- "F:/pml_data/"
-  varname = "ET"
-  resolution = 50
-  year  = 2013
-  month = 6
-  submonth = "a"
-  lat = 40.001501
-  lon = 116.379168
-  dist = 500
+  # dir <- "F:/pml_data/"
+  # varname = "ET"
+  # resolution = 50
+  # year  = 2013
+  # month = 6
+  # submonth = "a"
+  # lat = 40.001501
+  # lon = 116.379168
+  # dist = 500
 
   
   fn <- dir(dir, 
             paste(varname, ".*", year, sep = "")
             , full.names = TRUE)
-  
+    
   # palette
   palette <- c("Spectral", "YlGn")
   pals <- palette[1]
@@ -38,13 +38,20 @@ plotmap <- function(
   #==================================here
   # compute layer
   layer <- 1
-  if(str_detect(submonth, "a"))
+  if(str_detect(submonth, "上半月"))
     layer <- 2
   layer <- (as.numeric(month) - 1)*2 + layer
+  
+  # modify for landcover
+  if(varname == "landcover"){
+    layer <- 1
+    fn <- dir(dir, 
+              paste(varname, sep = "")
+              , full.names = TRUE)
     
-    
+  }
   # read raster file and aggreagate
-  r <- raster(fn, layer = layer)
+  r <- raster(fn, band = layer)
   
   
   aggregate_inx <- ceiling(as.numeric(resolution) / 10)
@@ -57,7 +64,7 @@ plotmap <- function(
   st_point <- st_point(c(lon, lat))%>% 
     st_sfc(crs = 4326) %>%  # WGS 1984
     st_transform(crs = 2436) # Beijing 1954 / Gauss-Kruger CM 117E
-  st_circle <- st_buffer(st_point, dist = dist, nQuadSegs = 30) %>%
+  st_circle <- st_buffer(st_point, dist = dist, nQuadSegs = 120) %>%
     st_transform(crs = 4326)
   
   # leaflet
