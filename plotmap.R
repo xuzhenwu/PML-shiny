@@ -1,5 +1,3 @@
-
-
 plotmap <- function(  
   dir,
   varname,
@@ -11,9 +9,9 @@ plotmap <- function(
   lon,
   dist){
   
-  # dir <- "F:/pml_data/"
-  # varname = "ET"
-  # resolution = 50
+  # dir <- "data/"
+  # varname = "SH"
+  # resolution = 10
   # year  = 2013
   # month = 6
   # submonth = "a"
@@ -69,7 +67,8 @@ plotmap <- function(
   
   # leaflet
   p <- leaflet() %>% addTiles() %>%
-    addRasterImage(r, colors = pal, opacity = 0.85) %>%
+    addRasterImage(r, colors = pal, opacity = 0.85,
+                   maxBytes = Inf) %>%
     addPolygons(data = st_circle, color = "blue")%>%
     addLegend(pal = pal, values = values(r),
               title = "Value")

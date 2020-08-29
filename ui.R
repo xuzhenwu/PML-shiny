@@ -34,7 +34,7 @@ choices_var <- c("Ec", "Ei", "Es", "ET",
                  "Rn", "SH",
                  "SWdown", "Tair", "VPD",
                  "landcover")
-file_location <- "F:/pml_data/"
+file_location <- "data/"
 
 
 
