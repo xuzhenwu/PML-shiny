@@ -6,11 +6,11 @@ plottrend <- function(dir,
 ){
   
   
-  # dir <- "F:/pml_data/"
+  # dir <- "F:/pml_data/1500/"
   # vars_trend <- c("GPP", "ET")
   # lat <- 40.001501  # 地理所
   # lon <- 116.379168
-  # dist <- 500 #meter
+  # dist <- 1500 #meter
   
   #==========================================================================
   # set ploygon 

@@ -8,27 +8,39 @@ aggregate_nc <- function(i, infns){
     
     fn <- infns[i]
     
-    new_resolution <- 1500
+    new_resolution <- 1000
     origin_resolution <- 10
     fact <- new_resolution / origin_resolution
     
-    r <- brick(fn, readunlim = TRUE)
-    r <- readAll(r)
+    # get inf in nc1
+    nc1 <- nc_open(fn)
+    
+    if(nc1$var[[1]]$ndims > 2){
+      r <- brick(fn, readunlim = TRUE)
+      r <- readAll(r)
+    }else{
+      r <- raster(fn)
+    }
     rout <- aggregate(r, fact, fun = mean)
     
     ofn <- gsub(origin_resolution, new_resolution, fn)
     
-    writeRaster(rout, ofn, "CDF")
+    writeRaster(rout, ofn, "CDF", 
+                overwrite = TRUE,
+                varname = nc1$var[[1]]$name, 
+                longname = nc1$var[[1]]$longname)
+    
     
     nc2 <- nc_open(ofn, write = TRUE)
     
-    var_name <- basename(ofn) %>% str_sub(1, str_locate(., "_")[1] - 1)
-    
-    nc2 <- ncvar_rename(nc2, "variable", var_name)
-    
+    # var_name <- basename(ofn) %>% str_sub(1, str_locate(., "_")[1] - 1)
+    # 
+    # nc2 <- ncvar_rename(nc2, "variable", var_name)
+    nc_close(nc1)
     nc_close(nc2)
+    
   })
-  
+  print(infns[i])
   print(t)
   
 }
@@ -37,6 +49,11 @@ library(parallel)
 infns <- dir("F:/pml_data/",
              "10m", 
              full.names =  TRUE)
+
+lapply(43:length(infns), aggregate_nc, infns)
+
+
+
 
 # 1 original: 10 sec
 # parallel: 16 sec

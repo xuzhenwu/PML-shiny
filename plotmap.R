@@ -1,3 +1,4 @@
+
 plotmap <- function(  
   dir,
   varname,
@@ -10,11 +11,11 @@ plotmap <- function(
   dist){
   
   # dir <- "data/"
-  # varname = "SH"
-  # resolution = 10
+  # varname = "Ec"
+  # resolution =  60
   # year  = 2013
   # month = 6
-  # submonth = "a"
+  # submonth = "上半月"
   # lat = 40.001501
   # lon = 116.379168
   # dist = 500

@@ -1,17 +1,4 @@
-library(shiny)
-library(leaflet)
-library(raster)
-library(rgdal)
-library(leaflet)
-library(RColorBrewer)
-library(reshape2)
-library(plotly)
-library(gapminder)
-library(ggplot2)
-library(rsconnect)
-library(shinyFiles)
-
-# Define server logic required to draw a histogram ----
+# Define server 
 server <- function(input, output) {
   
   # dependence.R
@@ -57,7 +44,7 @@ server <- function(input, output) {
   
   
   t1 <- eventReactive(input$clickshare,{
-  "一个低分辨率(300m)的可用于分享的web apps实例如下
+  "一个低分辨率(1000m)的可用于分享的web apps实例如下
     https://xuzhenwu.shinyapps.io/PML-shiny/ \n "
   })
   
@@ -78,5 +65,6 @@ server <- function(input, output) {
 }
 
 
-#shinyApp(ui = ui, server = server)
-#rsconnect :: deployApp(PMLshiny)
+# shinyApp(ui = ui, server = server)
+# rsconnect :: deployApp(PMLshiny)
+# rsconnect::appDependencies()

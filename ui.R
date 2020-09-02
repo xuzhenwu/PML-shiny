@@ -1,44 +1,3 @@
-slibrary <- function(fun){
-  fun_name <- as.character(substitute(fun))
-  if(is.element(fun_name, installed.packages()[,1]) == FALSE)
-    install.packages(fun_name)
-  COMMAND <- paste("library(", fun_name, ")", sep = "")
-  eval(parse(text = COMMAND))
-}
-
-# dependences 
-slibrary(shiny)
-slibrary(leaflet)
-slibrary(raster)
-slibrary(rgdal)
-slibrary(leaflet)
-slibrary(RColorBrewer)
-slibrary(reshape2)
-slibrary(plotly)
-slibrary(gapminder)
-slibrary(ggplot2)
-slibrary(rsconnect)
-slibrary(shinyFiles)
-slibrary(shinyWidgets)
-slibrary(exactextractr)
-slibrary(data.table)
-slibrary(sf)
-slibrary(ncdf4)
-slibrary(stringr)
-
-# setings
-choices_month <- format(seq.Date(from = as.Date("2013-01-01"), by = "month", length.out = 12*7), "%B-%Y")
-choices_var <- c("Ec", "Ei", "Es", "ET", 
-                 "GPP", "LAI",
-                 "LE", "Rainf",
-                 "Rn", "SH",
-                 "SWdown", "Tair", "VPD",
-                 "landcover")
-file_location <- "data/"
-
-
-
-
 ui <- fluidPage(
   
   
@@ -74,7 +33,7 @@ ui <- fluidPage(
                selectInput(inputId = "year",
                            label = "年份",
                            choices = 2013:2019,
-                           selected = 2019
+                           selected = 2013
                )),
         column(4,
                selectInput(inputId = "month",
@@ -98,11 +57,11 @@ ui <- fluidPage(
       ),
       
       sliderInput(inputId = "resolution",
-                  label = "分辨率",
+                  label = "分辨率(15)",
                   min = 10,
                   max = 100,
                   step = 10,
-                  value = 30
+                  value = 10
       ),
       
       actionButton("simulatemap", "应用地图绘制参数", class = "btn-primary"),
@@ -133,7 +92,7 @@ ui <- fluidPage(
                column(4,
                       numericInput(inputId = "dist",
                                    label = "范围",
-                                   value = 500))
+                                   value = 1000))
       ),
       
       
