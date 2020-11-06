@@ -18,7 +18,7 @@ ui <- fluidPage(
       h4(strong("数据库目录")),
       textAreaInput("dir", 
                     NULL, 
-                    value = file_location,
+                    value = 'F:/pml_data/',
                     #value = "data/",
                     #value = "F:/PML2.0_NCL_Sentinel_LAI_15D_CASE01/",
                     rows = 2),
@@ -53,11 +53,11 @@ ui <- fluidPage(
       selectInput(inputId = "varname_map",
                   label = "数据类型",
                   choices = choices_var[choices_var != "Rainf"],
-                  selected = "ET"
+                  selected = "landcover"
       ),
       
       sliderInput(inputId = "resolution",
-                  label = "分辨率(15)",
+                  label = "分辨率 (m) ",
                   min = 10,
                   max = 100,
                   step = 10,
@@ -164,8 +164,8 @@ ui <- fluidPage(
         # 3. main panel for display data
         #=========================================================================
         mainPanel(
-          # width = 8,
-          leafletOutput(outputId = "plotmap", height = 450),
+          width = 8,
+          leafletOutput(outputId = "plotmap", height = 600),
           
           plotlyOutput(outputId = "plottrend", height = 600)
           
