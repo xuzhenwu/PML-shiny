@@ -1,5 +1,6 @@
 
 plotmap <- function(
+  map,
   dir,
   varname,
   resolution,
@@ -87,34 +88,25 @@ plotmap <- function(
                        na.color = "transparent")
   }
   
-  # extra points
-  st_point <- st_point(c(lon, lat))%>% 
-    st_sfc(crs = 4326) %>%  # WGS 1984
-    st_transform(crs = 2436) # Beijing 1954 / Gauss-Kruger CM 117E
-  st_circle <- st_buffer(st_point, dist = dist, nQuadSegs = 1000) %>%
-    st_transform(crs = 4326)
+
   
   # leaflet
   if(varname != "landcover"){
-    p <- leaflet() %>% addTiles() %>%
+    p <- map %>%
       addMarkers(lon, lat)%>%
-      addPolylines(data = st_circle, color = "black",
-                   weight = 1.5,
-                   opacity = 0.8, fillOpacity = 0.2)%>%
       addRasterImage(r, colors = pal, opacity = 0.8,
                      maxBytes = Inf) %>%
       addLegend(pal = pal,
+                position = "bottomleft",
                 values = values(r),
                 title = varname)
   }else{
-    p <- leaflet() %>% addTiles() %>%
+    p <- map %>%
       addMarkers(lon, lat)%>%
-      addPolylines(data = st_circle, color = "black",
-                   weight = 1.5,
-                   opacity = 0.8, fillOpacity = 0.2)%>%
       addRasterImage(r, colors = pal, opacity = 0.8,
                      maxBytes = Inf) %>%
       addLegend(pal = pal,
+                position = "bottomleft",
                 values = values(r),
                 # not that category data needs transform
                 labFormat = labelFormat(transform = function(x){
