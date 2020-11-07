@@ -148,7 +148,7 @@ navbarPage("北京城区通量数据分析程序", id = "nav",
                         # Shiny versions prior to 0.11 should use class = "modal" instead.
                         absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE,
                                       draggable = TRUE, top = 60, left = "auto", right = 20, bottom = "auto",
-                                      width = 400, height = "auto",
+                                      width = 600, height = "auto",
                                       
                                       hr(),
                                       
@@ -214,7 +214,9 @@ navbarPage("北京城区通量数据分析程序", id = "nav",
                                       
                                       dataTableOutput("table"),
                                       
-                                      actionButton("clearallpoints", "去除所有输入", class = "btn-primary"), 
+                                      actionButton("clearallpoints", "去除所有输入", class = "btn-primary"),
+                                      
+                                      actionButton("clearlastpoints", "去除上次输入", class = "btn-primary")
                                       
                         ),
                         
@@ -229,5 +231,10 @@ navbarPage("北京城区通量数据分析程序", id = "nav",
            ),
            
            # TAB 3
-           tabPanel("数据可视化与分析")
+           tabPanel("监测点时间序列分析",
+                    div(class="outer",
+                        dataTableOutput("table1")
+                        
+                        )
+           )
 )

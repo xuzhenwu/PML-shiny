@@ -102,7 +102,6 @@ plotmap <- function(
                 title = varname)
   }else{
     p <- map %>%
-      addMarkers(lon, lat)%>%
       addRasterImage(r, colors = pal, opacity = 0.8,
                      maxBytes = Inf) %>%
       addLegend(pal = pal,
@@ -114,9 +113,6 @@ plotmap <- function(
                 }),
                 title = varname)
   }
-  p
-  
-  
-  
+
   return(p)
 }

@@ -26,6 +26,7 @@ library(sf)
 library(ncdf4)
 library(stringr)
 library(leaflet)
+library(DT)
 
 
 # setings

@@ -19,7 +19,7 @@ server <- function(input, output) {
   
   # add markers and tables
   values <- reactiveValues()
-  values$table <- data.table(lng = numeric(), lat = numeric(), dist = numeric())
+  values$table <- data.table(name = character(), lng = numeric(), lat = numeric(), dist = numeric())
   print(isolate(values$table))
   print("s1")
   
@@ -27,7 +27,7 @@ server <- function(input, output) {
     #print(values$table)
     if(!is.null(input$map_click$lng)){
       click = input$map_click
-      newLine <- isolate(data.table(lng = click$lng, lat = click$lat, dist = input$dist))
+      newLine <- isolate(data.table(name = "未命名", lng = click$lng, lat = click$lat, dist = input$dist))
       print(newLine)
       isolate(values$table <- rbind(values$table, newLine))
     }
@@ -43,47 +43,76 @@ server <- function(input, output) {
                                     dom = 'Bfrtip',
                                     buttons = c('csv', 'excel')
                                   ),
-                                  selection = 'none', 
-                                  editable = TRUE, 
+                                  selection = 'none',
+                                  editable = TRUE,
                                   rownames = TRUE,
                                   extensions = 'Buttons',
                                   class = "display"
   )
+  observeEvent(input$table_cell_edit, {
+    values$table[input$table_cell_edit$row,input$table_cell_edit$col] <<- input$table_cell_edit$value
+  })
+
+  
+  
   # to see if this pare
   # observeEvent(input$banking.df_data_cell_edit, {
   #   d1[input$banking.df_data_cell_edit$row,input$banking.df_data_cell_edit$col] <<- input$banking.df_data_cell_edit$value
   # })
   
   # add marker and buffer circle by clicking
-  observeEvent(input$map_click, {
+  
+  update_marker <- function(){
+    
+    leafletProxy('map')%>%
+      clearMarkers() %>%
+      clearShapes()
     
     nrow <- nrow(values$table)
     if(nrow != 0){
       
       data   <- values$table
       sf_point <- st_as_sf(data, coords = c("lng", "lat")) %>% 
-         st_set_crs(4326)%>% 
-         st_transform(crs = 2436)
+        st_set_crs(4326)%>% 
+        st_transform(crs = 2436)
       st_circle <- st_buffer(sf_point, data$dist)%>% 
-              st_transform(crs = 4326)
+        st_transform(crs = 4326)
       
       leafletProxy('map')%>%
-        clearMarkers() %>%
-        clearShapes() %>%
         addPolylines(data = st_circle, color = "black",
                      weight = 1.5,
                      opacity = 0.8, fillOpacity = 0.2)%>%
         addMarkers(lng = values$table$lng, lat = values$table$lat)
     }
+    
+  }
+  observeEvent(input$map_click, {
+    update_marker()
   })
+  observeEvent(input$table_cell_edit, {
+    update_marker()
+  })
+  
   # clear all markers by clearallpoints buttom
   observeEvent(input$clearallpoints, {
-    values$table <- data.table(lng = NULL, lat = NULL, dist = NULL)
-    leafletProxy('map')%>%
-      clearMarkers()%>%
-      clearShapes()
+    values$table <- data.table(name = NULL, lng = NULL, lat = NULL, dist = NULL)
+    # cant use update marker fun as it only allows add new marker
+    update_marker()
     
   })
+  # clear last markers
+  observeEvent(input$clearlastpoints, {
+    print(nrow(values$table))
+    max_row <- nrow(values$table) - 1
+    if(max_row > 0)
+      values$table <- values$table[1:max_row,]
+    else
+      values$table <- data.table(name = NULL, lng = NULL, lat = NULL, dist = NULL)
+    update_marker()
+    
+  })
+  
+  
   
   # add raster map by deploy the simulatemap buttom
   observeEvent(input$simulatemap,{

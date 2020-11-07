@@ -76,8 +76,7 @@ server <- function(input, output) {
     
     output$updated.df<-renderDataTable({
         view_fun()
-    }
-    )
+    })
 }
 
 shinyApp(ui = ui, server = server)
