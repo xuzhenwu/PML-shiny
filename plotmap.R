@@ -6,10 +6,7 @@ plotmap <- function(
   resolution,
   year,
   month,
-  submonth,
-  lat,
-  lon,
-  dist){
+  submonth){
   
   
   #debug options
@@ -93,7 +90,6 @@ plotmap <- function(
   # leaflet
   if(varname != "landcover"){
     p <- map %>%
-      addMarkers(lon, lat)%>%
       addRasterImage(r, colors = pal, opacity = 0.8,
                      maxBytes = Inf) %>%
       addLegend(pal = pal,

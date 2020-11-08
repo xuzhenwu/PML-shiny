@@ -1,8 +1,6 @@
 plottrend <- function(dir,
                       vars_trend,
-                      lat,
-                      lon,
-                      dist
+                      table
 ){
   
   
@@ -11,6 +9,12 @@ plottrend <- function(dir,
   # lat <- 40.001501  # 地理所
   # lon <- 116.379168
   # dist <- 1500 #meter
+  lon <- table$lng[1]
+  lat <- table$lat[1]
+  dist <- table$dist[1]
+  name <- table$name[1]
+
+  n <- nrow(table)
   
   #==========================================================================
   # set ploygon 
@@ -21,6 +25,8 @@ plottrend <- function(dir,
     st_transform(crs = 2436) # Beijing 1954 / Gauss-Kruger CM 117E
   st_circle <- st_buffer(st_point, dist = dist, nQuadSegs = 120) %>%
     st_transform(crs = 4326)
+  
+
   
   
   # extract info
@@ -81,9 +87,14 @@ plottrend <- function(dir,
     }
   }
   
+  print(paste(lat, lon, dist))
+  
+  
+  
   pdf <- data.frame(inx = inx, 
                     value = value, 
-                    variable = variable
+                    variable = variable, 
+                    point = name
                     )
     
   labels1 <- paste(2013:2019, 1, sep = "-")
@@ -112,7 +123,7 @@ plottrend <- function(dir,
     trend_value[i]  <- (lm_sum[["coefficients"]][2,1]*24)%>%round(3) #modify for inx
   }
   odf <- data.table(variable, ave, trend_value, pvalue)
-  ofn <- paste(dir, "trend_info.csv", sep = "")
+  ofn <- paste("trend_info.csv", sep = "")
   fwrite(odf, ofn)
   
   

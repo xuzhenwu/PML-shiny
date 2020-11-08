@@ -5,8 +5,8 @@ account: xuzhenwu
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 2741156
-bundleId: 3583975
+bundleId: 3831551
 url: https://xuzhenwu.shinyapps.io/PML-shiny/
-when: 1599050883.39135
+when: 1604760041.58732
 asMultiple: FALSE
 asStatic: FALSE

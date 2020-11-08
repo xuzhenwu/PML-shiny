@@ -124,10 +124,8 @@ server <- function(input, output) {
               input$resolution,
               input$year,
               input$month,
-              input$submonth,
-              input$lat,
-              input$lon,
-              input$dist)
+              input$submonth)
+    
   })
   
   
@@ -135,14 +133,14 @@ server <- function(input, output) {
   
   
   
-  x2 <- eventReactive(input$simulatetrend,{
-    plottrend(input$dir,
-              input$vars_trend,
-              input$lat,
-              input$lon,
-              input$dist
-    )
-  })
+  # x2 <- eventReactive(input$simulatetrend,{
+  #   plottrend(input$dir,
+  #             input$vars_trend,
+  #             input$lat,
+  #             input$lon,
+  #             input$dist
+  #   )
+  # })
   x3 <- eventReactive(input$simulatetrend,{
     trend_table(input$dir)
   })
@@ -151,8 +149,12 @@ server <- function(input, output) {
   # output$plotmap <- renderLeaflet({
   #   x1()
   # })
-  output$plottrend <- renderPlotly({
-    x2()
+  observeEvent(input$simulatetrend,{
+    output$plottrend <- renderPlotly({
+      plottrend(input$dir,
+                input$vars_trend,
+                values$table)
+    })
   })
   
   output$trendinfo <- renderTable({
