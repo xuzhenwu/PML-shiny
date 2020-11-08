@@ -9,54 +9,81 @@ plottrend <- function(dir,
   # lat <- 40.001501  # 地理所
   # lon <- 116.379168
   # dist <- 1500 #meter
-  lon <- table$lng[1]
-  lat <- table$lat[1]
+
   dist <- table$dist[1]
   name <- table$name[1]
-
-  n <- nrow(table)
+  
+  nrow <- nrow(table)
   
   #==========================================================================
   # set ploygon 
   # double transform for getting a meter-based circle
   #==========================================================================
-  st_point <- st_point(c(lon, lat))%>% 
-    st_sfc(crs = 4326) %>%  # WGS 1984
-    st_transform(crs = 2436) # Beijing 1954 / Gauss-Kruger CM 117E
-  st_circle <- st_buffer(st_point, dist = dist, nQuadSegs = 120) %>%
+  sf_point <- st_as_sf(table, coords = c("lng", "lat")) %>% 
+    st_set_crs(4326)%>% 
+    st_transform(crs = 2436)
+  st_circle <- st_buffer(sf_point, table$dist)%>% 
     st_transform(crs = 4326)
   
-
   
   
-  # extract info
+  
+  # extract the extent to reduce time of reading
   fl <- dir(dir,
             paste("*.nc", sep = ""), 
             full.names = TRUE)
-  fn <- fl[1]
-  nc <- nc_open(fn)
-  PI <- 3.1415926
-  lon_start <- lon - dist/((111*10^3)*cos(lat/360*2*PI)) * 2
-  lon_end <- lon + dist/((111*10^3)*cos(lat/360*2*PI)) * 2
-  lat_start <- lat + dist/((111*10^3)) * 2
-  lat_end <- lat - dist/((111*10^3)) * 2
-  er <- (nc$dim$lon$vals - lon_start)^2
-  ilon_start <- which.min(er)
-  er <- (nc$dim$lon$vals - lon_end)^2
-  ilon_end <- which.min(er)
-  er <- (nc$dim$lat$vals - lat_start)^2
-  ilat_start <- which.min(er)
-  er <- (nc$dim$lat$vals - lat_end)^2
-  ilat_end <- which.min(er)
-  start <- c(ilon_start, ilat_start)
-  count <- c(ilon_end - ilon_start, ilat_end - ilat_start)
-  nc_close(nc)
+  # fn <- fl[1]
+  # nc <- nc_open(fn)
+  # PI <- 3.1415926
+  # lon_start <- lat_start <- lon_end <- lat_end <- 0
+  # ilon_start <- ilat_start <- ilon_end <- ilat_end <- 0
+  # for(i in 1:nrow){
+  #   
+  #   lon <- table$lng[i]
+  #   lat <- table$lat[i]
+  #   dist < - table$dist[i]
+  #   
+  #   lon_start[i] <- lon - dist/((111*10^3)*cos(lat/360*2*PI)) * 2
+  #   lon_end[i] <- lon + dist/((111*10^3)*cos(lat/360*2*PI)) * 2
+  #   lat_start[i] <- lat + dist/((111*10^3)) * 2
+  #   lat_end[i] <- lat - dist/((111*10^3)) * 2
+  #   er <- (nc$dim$lon$vals - lon_start[i])^2
+  #   ilon_start[i] <- which.min(er)
+  #   er <- (nc$dim$lon$vals - lon_end[i])^2
+  #   ilon_end[i] <- which.min(er)
+  #   er <- (nc$dim$lat$vals - lat_start[i])^2
+  #   ilat_start[i] <- which.min(er)
+  #   er <- (nc$dim$lat$vals - lat_end[i])^2
+  #   ilat_end[i] <- which.min(er)
+  # 
+  # }
+  # start <- c(min(ilon_start), min(ilat_start))
+  # count <- c(max(ilon_end) - min(ilon_start), max(ilat_end)- min(ilat_start))
+  # lon_start <- min(lon_start)
+  # lat_end <- min(lat_end)
+  # lon_end <- max(lon_end) 
+  # lat_start <- max(lat_start)
+  # 
+  # nc_close(nc)
+  
+  # funcs
+  fix_mon <- function(k){
+    x <- floor((k-1)/2)+1
+    if(x >= 10)
+      return(as.character(x))
+    else 
+      return(paste0(0, x))
+  }
+  fix_day <- function(k){
+    if(k%%2 == 0)
+      return("15")
+    else
+      return("01")
+  }
   
   
   # vars
-  ii <- 1
-  inx <- value <- 1
-  variable <- ""
+  name <- variable <- inx <- value <- array(dim = c(length(vars_trend), 2019-2013+1, 24,nrow))
   for(i in seq_along(vars_trend)){
     # year
     for(j in 2013:2019){
@@ -66,37 +93,54 @@ plottrend <- function(dir,
       nc <- nc_open(fn)
       # tiles
       for(k in 1:24){
-        data <- ncvar_get(nc, 
-                          varid = vars_trend[i], 
-                          c(start, k), 
-                          c(count, 1)
-                          )
+        # data <- ncvar_get(nc, 
+        #                   varid = vars_trend[i], 
+        #                   c(start, k), 
+        #                   c(count, 1)
+        # )
         
-        value[ii] <- raster(data, 
-                            xmn = lon_start, 
-                            xmx = lon_end, 
-                            ymn = lat_end, 
-                            ymx = lat_start,
-                            crs = "+proj=longlat +datum=WGS84")%>%
-          exact_extract(st_circle, "mean")
-        variable[ii] <- vars_trend[i]
-        inx[ii] <- k + (j - 2013)*24
-        ii <- ii + 1
+        # value[i, j-2013+1, k, ] <- raster(data, 
+        #                        xmn = lon_start, 
+        #                        xmx = lon_end, 
+        #                        ymn = lat_end, 
+        #                        ymx = lat_start,
+        #                        crs = "+proj=longlat +datum=WGS84")%>%
+        #   exact_extract(st_circle, "mean") %>%
+        #   as.vector()
+        
+        value[i, j-2013+1, k, ] <- raster(fn, band = k)%>%
+          exact_extract(st_circle, "mean") %>%
+          as.vector()
+        
+        variable[i, j-2013+1, k, ] <- vars_trend[i]
+        name[i, j-2013+1, k, ] <- table$name
+        inx[i, j-2013+1, k, ] <- paste(j, fix_mon(k), fix_day(k), sep = "")
+        
+        # print(value[i, j-2013+1, k, ])
+        # print(variable[i, j-2013+1, k, ])
+        # print(name[i, j-2013+1, k, ])
+        # print(inx[i, j-2013+1, k, ])
+        # 
+        # Sys.sleep()
+        
+        
       }
       nc_close(nc)
     }
   }
   
-  print(paste(lat, lon, dist))
+  
+  pdf <- data.table(inx = as_date(as.vector(inx)), 
+                    value = as.vector(value), 
+                    variable = as.vector(variable), 
+                    name = as.vector(name)
+  )
+  fwrite(pdf, "extract.csv")
+  
+
   
   
   
-  pdf <- data.frame(inx = inx, 
-                    value = value, 
-                    variable = variable, 
-                    point = name
-                    )
-    
   labels1 <- paste(2013:2019, 1, sep = "-")
   labels2 <- paste(2013:2019, 6, sep = "-")
   inx <- 1
@@ -123,27 +167,25 @@ plottrend <- function(dir,
     trend_value[i]  <- (lm_sum[["coefficients"]][2,1]*24)%>%round(3) #modify for inx
   }
   odf <- data.table(variable, ave, trend_value, pvalue)
-  ofn <- paste("trend_info.csv", sep = "")
+  ofn <- paste("trend.csv", sep = "")
   fwrite(odf, ofn)
   
   
   p <- ggplot(data = pdf,
-              aes(inx, value, color = variable))+
-    geom_point()+
-    geom_smooth(method = "lm",
-                color = "red",
-                se = FALSE
-    )+
+              aes(inx, value, color = name))+
+    geom_point(size = 0.8, alpha = 0.6)+
+    # geom_smooth(method = "lm",
+    #             se = FALSE
+    # )+
     labs(x = "Date", y = "")+
-    scale_x_continuous(breaks = seq(1, 24*7, 12),
-                       labels = labels
-    )+
+    # scale_x_continuous(breaks = seq(1, 24*7, 12),
+    #                    labels = labels
+    # )+
     scale_color_brewer(palette='Set1',
-                       name = "Variables")+
+                       name = NULL)+
     facet_wrap(.~variable, ncol = 1, scales = "free_y")+
     theme(legend.position = "none",
-          axis.title.y = element_text(vjust = 0)
-          )
+      axis.title.y = element_text(vjust = 0))
   
   p <- ggplotly(p)
   

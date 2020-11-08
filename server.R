@@ -27,6 +27,15 @@ server <- function(input, output) {
     #print(values$table)
     if(!is.null(input$map_click$lng)){
       click = input$map_click
+      
+      # st <- st_point(c(click$lng, click$lat))%>% 
+      #   st_as_sf(coords = c("lng", "lat")) %>% 
+      #   st_set_crs(3857)
+      # 
+      # print(st)
+      # st <- st_transform(st, crs = 4326)
+      # print(st)
+        
       newLine <- isolate(data.table(name = "未命名", lng = click$lng, lat = click$lat, dist = input$dist))
       print(newLine)
       isolate(values$table <- rbind(values$table, newLine))
@@ -151,10 +160,46 @@ server <- function(input, output) {
   # })
   observeEvent(input$simulatetrend,{
     output$plottrend <- renderPlotly({
-      plottrend(input$dir,
+      withProgress(message = '正在处理数据...', value = 0, {
+        
+        plottrend(input$dir,
                 input$vars_trend,
                 values$table)
+        
+      })
     })
+    output$table_extract <- renderDataTable(fread("extract.csv"),
+                                            options = list(
+                                              paging = TRUE,
+                                              searching = TRUE,
+                                              fixedColumns = TRUE,
+                                              autoWidth = TRUE,
+                                              ordering = TRUE,
+                                              dom = 'Bfrtip',
+                                              buttons = c('csv', 'excel')
+                                            ),
+                                            selection = 'none',
+                                            editable = TRUE,
+                                            rownames = TRUE,
+                                            extensions = 'Buttons',
+                                            class = "display")
+    output$table_trend <- renderDataTable(fread("trend.csv"),
+                                          options = list(
+                                            paging = TRUE,
+                                            searching = TRUE,
+                                            fixedColumns = TRUE,
+                                            autoWidth = TRUE,
+                                            ordering = TRUE,
+                                            dom = 'Bfrtip',
+                                            buttons = c('csv', 'excel')
+                                          ),
+                                          selection = 'none',
+                                          editable = TRUE,
+                                          rownames = TRUE,
+                                          extensions = 'Buttons',
+                                          class = "display")
+    
+    
   })
   
   output$trendinfo <- renderTable({

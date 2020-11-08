@@ -2,132 +2,7 @@
 navbarPage("北京城区通量数据分析程序", id = "nav",
            
            
-           # TAB 1
-           tabPanel("站点时间序列分析",
-                    
-                    # sidebarLayout(sidebarPanel(),
-                    #               mainPanel()),
-                    
-                    sidebarLayout(
-                      
-                      
-                      #=========================================================================
-                      # 1. sider bar panel for inputs
-                      #=========================================================================
-                      
-                      sidebarPanel(
-                        width = 3,
-                        
-
-                        
-                        
-                        
-                        
-                        
-
-                        
-                        # sliderTextInput(
-                        #   inputId    = "date_range",
-                        #   label      = "时间区间",
-                        #   choices    = choices_month,
-                        #   animate    = T,
-                        #   selected   = c(min(choices_month), max(choices_month)),
-                        #   grid       = F,
-                        #   width      = "100%"
-                        # ),
-                        
-                        
-                        fluidRow(column(4,
-                                        numericInput(inputId = "lon",
-                                                     label = "经度",
-                                                     value = 116.379168)),
-                                 column(4,
-                                        numericInput(inputId = "lat",
-                                                     label = "纬度",
-                                                     value = 40.001501))
-                        ),
-                        
-                        
-                        selectInput(inputId = "vars_trend",
-                                    label = "数据类型",
-                                    choices = choices_var[choices_var != "landcover"], #delete land cover
-                                    selected = c("ET", "GPP", "Rainf", "LE"),
-                                    multiple = TRUE),
-                        
-                        
-                        actionButton("simulatetrend", "应用时间序列参数", class = "btn-primary"),
-                        
-                        hr(),
-                        
-                        h4(strong("趋势分析结果")),
-                        
-                        tableOutput("trendinfo"),
-                        
-                      ),
-                      
-                      
-                      mainPanel(
-                        width = 9,
-                        
-                        sidebarLayout(
-                          position = "right",
-                          
-                          
-                          #=========================================================================
-                          # 2. sider bar panel for outputs
-                          #=========================================================================
-                          
-                          sidebarPanel(width = 4,
-                                       
-                                       
-                                       h4(strong("项目信息")),
-                                       
-                                       p("本软件为中国科学院地理与资源研究所受北京市水科院委托而制作，
-                     供#北京地区高时空分辨率的水热通量数据集构建#项目使用
-                       其最终解释权归中国科学院地理与资源研究所所有，
-                       未经允许不得用于其他项目以及商业行为。"),
-                                       
-                                       
-                                       h4(strong("注意事项")),
-                                       
-                                       p("1.原始数据为10m分辨率，但在内存有限的计算机请选择低分辨率绘图，默认为30m分辨率;
-                     2.固定站点是在一定半径范围内获取得通量数据。对于区域分析，可选择粗分辨率；对于单点，可以调低至基本覆盖站点测量范围;
-                     3.数据地理坐标系为WGS1984;
-                       4. 重新修改应用设置所需时间一般小于1分钟，在修改完成后请点击应用选项完成对应改动。"),
-                                       
-                                       
-                                       h4(strong("支持信息")),
-                                       
-                                       textOutput("shareinfo"),
-                                       
-                                       p(),
-                                       
-                                       textOutput("developerinfo"),
-                                       
-                                       fluidRow(
-                                         actionButton("clickdeveloper", "联系开发者", class = "btn-danger"),
-                                         actionButton("clickshare", "分享", class = "btn-lg btn-success")
-                                       )
-                                       
-                                       
-                          ),
-                          
-                          #=========================================================================
-                          # 3. main panel for display data
-                          #=========================================================================
-                          mainPanel(
-                            width = 8,
-                            #leafletOutput(outputId = "plotmap", height = 600),
-                            
-                            plotlyOutput(outputId = "plottrend", height = 600)
-                            
-                          ) # end of main panel
-                          
-                          
-                        )
-                      )
-                    )
-           ),
+           
            
            # TAB 1
            tabPanel("动态地图",
@@ -141,7 +16,7 @@ navbarPage("北京城区通量数据分析程序", id = "nav",
                           includeCSS("styles.css"),
                           includeScript("gomap.js")
                         ),
-            
+                        
                         # If not using custom CSS, set height of leafletOutput to a number instead of percent
                         leafletOutput("map", width="100%", height="100%"),
                         
@@ -161,7 +36,7 @@ navbarPage("北京城区通量数据分析程序", id = "nav",
                                                     value = "data/",
                                                     #value = "F:/PML2.0_NCL_Sentinel_LAI_15D_CASE01/",
                                                     rows = 1),
-                                
+                                      
                                       h4(strong("参数设置")),
                                       
                                       fluidRow(
@@ -207,7 +82,7 @@ navbarPage("北京城区通量数据分析程序", id = "nav",
                                       
                                       hr(),
                                       
-                                      h4(strong("固定站点时间序列分析")),
+                                      h4(strong("添加站点信息")),
                                       numericInput(inputId = "dist",
                                                    label = "默认范围 (m)",
                                                    value = 500),
@@ -230,11 +105,122 @@ navbarPage("北京城区通量数据分析程序", id = "nav",
                     
            ),
            
-           # TAB 3
-           tabPanel("监测点时间序列分析",
-                    div(class="outer",
-                        dataTableOutput("table1")
+           
+           # TAB 2
+           tabPanel("站点时间序列分析",
+                    
+                    # sidebarLayout(sidebarPanel(),
+                    #               mainPanel()),
+                    
+                    sidebarLayout(
+                      
+                      
+                      #=========================================================================
+                      # 1. sider bar panel for inputs
+                      #=========================================================================
+                      
+                      sidebarPanel(
+                        width = 2,
                         
-                        )
+                        
+                        # hr(),
+                        # 
+                        # h4(strong("站点信息")),
+                   
+                        selectInput(inputId = "vars_trend",
+                                    label = "选择输出的数据",
+                                    choices = choices_var[choices_var != "landcover"], #delete land cover
+                                    selected = c("ET", "GPP", "Rainf", "LE"),
+                                    multiple = TRUE),
+                        
+                        
+                        actionButton("simulatetrend", "应用设置", class = "btn-primary"),
+                        
+                        # hr(),
+                        # 
+                        # h4(strong("趋势分析结果")),
+                        # 
+                        # tableOutput("trendinfo")
+
+                        
+                      ),
+                      
+                      
+                      mainPanel(
+                        width = 10,
+                        
+                        # sidebarLayout(
+                        #   position = "right",
+                        
+                        
+                        
+                        
+                        #=========================================================================
+                        # 3. main panel for display data
+                        #=========================================================================
+                        # mainPanel(
+                        #   width = 8,
+                        #leafletOutput(outputId = "plotmap", height = 600),
+                        
+                        plotlyOutput(outputId = "plottrend", height = 1000) %>% withSpinner(color="#0dc5c1"),
+                        dataTableOutput("table_extract"),
+                        dataTableOutput("table_trend")
+                        
+                        #   ) # end of main panel
+                        #   
+                        #   
+                        #)
+                      )
+
+                      
+                    )
+           ),
+           
+           # TAB 3
+           tabPanel("帮助文档",
+                    div(class="outer",
+                        
+                        includeMarkdown("README.md")
+                        # dataTableOutput("table1"),
+                        #=========================================================================
+                        # 2. sider bar panel for outputs
+                        #=========================================================================
+                        
+                        # sidebarPanel(width = 4,
+                        
+                        #                   
+                        # h4(strong("项目信息")),
+                        # 
+                        # p("本软件为中国科学院地理与资源研究所受北京市水科院委托而制作，
+                        # 供#北京地区高时空分辨率的水热通量数据集构建#项目使用
+                        #   其最终解释权归中国科学院地理与资源研究所所有，
+                        #   未经允许不得用于其他项目以及商业行为。"),
+                        # 
+                        # 
+                        # h4(strong("注意事项")),
+                        # 
+                        # p("1.原始数据为10m分辨率，但在内存有限的计算机请选择低分辨率绘图，默认为30m分辨率;
+                        # 2.固定站点是在一定半径范围内获取得通量数据。对于区域分析，可选择粗分辨率；对于单点，可以调低至基本覆盖站点测量范围;
+                        # 3.数据地理坐标系为WGS1984;
+                        #   4. 重新修改应用设置所需时间一般小于1分钟，在修改完成后请点击应用选项完成对应改动。"),
+                        # 
+                        # 
+                        # h4(strong("支持信息")),
+                        # 
+                        # textOutput("shareinfo"),
+                        # 
+                        # p(),
+                        # 
+                        # textOutput("developerinfo"),
+                        # 
+                        # fluidRow(
+                        #   actionButton("clickdeveloper", "联系开发者", class = "btn-danger"),
+                        #   actionButton("clickshare", "分享", class = "btn-lg btn-success")
+                        # )
+                        #                   
+                        #                   
+                        #      ),
+                        
+                    )
            )
 )
