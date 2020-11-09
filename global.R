@@ -36,7 +36,6 @@ choices_month <- format(seq.Date(from = as.Date("2013-01-01"), by = "month", len
 choices_var <- c("Ec", "Ei", "Es", "ET", 
                  "GPP", "LAI",
                  "LE", "Rainf",
-                 "Rn", "SH",
-                 "SWdown", "Tair", "VPD",
+                 "Rn", "SWdown", "Tair", "VPD",
                  "landcover")
 file_location <- "data/"

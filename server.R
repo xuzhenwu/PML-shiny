@@ -1,5 +1,5 @@
 # Define server 
-server <- function(input, output) {
+server <- function(input, output, session) {
   
   # dependence.R
   source("plottrend.R", encoding = 'UTF-8')
@@ -42,6 +42,7 @@ server <- function(input, output) {
     }
     
   })
+
   output$table <- renderDataTable(values$table,
                                   options = list(
                                     paging = TRUE,
@@ -94,10 +95,10 @@ server <- function(input, output) {
       
       
       labs <- lapply(seq(nrow(values$table)), function(i) {
-        paste0( '<p>', "name: ",  values$table[i, "name"], '<p></p>', 
-                '<p>', "lng: ",  values$table[i, "lng"], '<p></p>',
-                '<p>', "lat: ",  values$table[i, "lat"], '<p></p>',
-                '<p>', "dist: ",  values$table[i, "dist"], '<p></p>') 
+        paste0( '<p>', "站点名: ",  values$table[i, "name"], '<p></p>', 
+                '<p>', "经度: ",  values$table[i, "lng"], '<p></p>',
+                '<p>', "纬度: ",  values$table[i, "lat"], '<p></p>',
+                '<p>', "半径范围: ",  values$table[i, "dist"], '<p></p>') 
       })
       
       leafletProxy('map')%>%
@@ -177,6 +178,9 @@ server <- function(input, output) {
   #   x1()
   # })
   observeEvent(input$simulatetrend,{
+    
+    updateTabsetPanel(session, inputId = "T2", selected = "T2A1")
+
     output$plottrend <- renderPlotly({
       withProgress(message = '正在处理数据...', value = 50, {
         
@@ -187,7 +191,9 @@ server <- function(input, output) {
         
       })
     })
-    output$table_extract <- renderDataTable(fread("extract.csv"),
+    table_extract <- fread("extract.csv")
+    names(table_extract) <- c("站点名称", "变量", "日期", "值")
+    output$table_extract <- renderDataTable(table_extract ,
                                             options = list(
                                               paging = TRUE,
                                               searching = TRUE,
@@ -205,7 +211,10 @@ server <- function(input, output) {
                                             rownames = TRUE,
                                             extensions = 'Buttons',
                                             class = "display")
-    output$table_trend <- renderDataTable(fread("trend.csv"),
+
+    table_trend <- fread("trend.csv")
+    names(table_trend) <- c("站点名称", "变量", "均值", "趋势值(单位/年)", "P值", "R2")
+    output$table_trend <- renderDataTable(table_trend,
                                           options = list(
                                             paging = TRUE,
                                             searching = TRUE,
@@ -223,6 +232,8 @@ server <- function(input, output) {
                                           rownames = TRUE,
                                           extensions = 'Buttons',
                                           class = "display")
+    
+
     
     
   })
