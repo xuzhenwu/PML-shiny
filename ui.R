@@ -37,7 +37,7 @@ navbarPage("北京城区通量数据分析程序", id = "nav",
                                                     #value = "F:/PML2.0_NCL_Sentinel_LAI_15D_CASE01/",
                                                     rows = 1),
                                       
-                                      h4(strong("参数设置")),
+                                      h4(strong("地图参数设置")),
                                       
                                       fluidRow(
                                         
@@ -89,9 +89,9 @@ navbarPage("北京城区通量数据分析程序", id = "nav",
                                       
                                       dataTableOutput("table"),
                                       
-                                      actionButton("clearallpoints", "去除所有输入", class = "btn-primary"),
+                                      actionButton("clearallpoints", "重新选择所有站点", class = "btn-primary"),
                                       
-                                      actionButton("clearlastpoints", "去除上次输入", class = "btn-primary")
+                                      actionButton("clearlastpoints", "重新选择上一个站点", class = "btn-primary")
                                       
                         ),
                         
@@ -110,77 +110,103 @@ navbarPage("北京城区通量数据分析程序", id = "nav",
            tabPanel("站点时间序列分析",
                     
                     # sidebarLayout(sidebarPanel(),
-                    #               mainPanel()),
-                    
-                    sidebarLayout(
-                      
-                      
-                      #=========================================================================
-                      # 1. sider bar panel for inputs
-                      #=========================================================================
-                      
-                      sidebarPanel(
-                        width = 2,
-                        
-                        
-                        # hr(),
-                        # 
-                        # h4(strong("站点信息")),
-                   
-                        selectInput(inputId = "vars_trend",
-                                    label = "选择输出的数据",
-                                    choices = choices_var[choices_var != "landcover"], #delete land cover
-                                    selected = c("ET", "GPP", "Rainf", "LE"),
-                                    multiple = TRUE),
-                        
-                        
-                        actionButton("simulatetrend", "应用设置", class = "btn-primary"),
-                        
-                        # hr(),
-                        # 
-                        # h4(strong("趋势分析结果")),
-                        # 
-                        # tableOutput("trendinfo")
 
-                        
+                    h4(strong(" 选择分析的变量")),
+
+                    fluidRow(
+                      column(3,
+                             selectInput(inputId = "vars_trend",
+                                         label = NULL,
+                                         width = 800,
+                                         choices = choices_var[choices_var != "landcover"], #delete land cover
+                                         selected = c("ET", "GPP", "Rainf", "LE"),
+                                         multiple = TRUE)
                       ),
-                      
-                      
-                      mainPanel(
-                        width = 10,
-                        
-                        # sidebarLayout(
-                        #   position = "right",
-                        
-                        
-                        
-                        
-                        #=========================================================================
-                        # 3. main panel for display data
-                        #=========================================================================
-                        # mainPanel(
-                        #   width = 8,
-                        #leafletOutput(outputId = "plotmap", height = 600),
-                        
-                        plotlyOutput(outputId = "plottrend", height = 1000) %>% withSpinner(color="#0dc5c1"),
-                        dataTableOutput("table_extract"),
-                        dataTableOutput("table_trend")
-                        
-                        #   ) # end of main panel
-                        #   
-                        #   
-                        #)
+                      column(2,
+                             
+                             actionButton("simulatetrend", "应用", class = "btn-primary")
                       )
-
-                      
+                    ),
+                    
+                    fluidRow(
+                      column(7,
+                             
+                             
+                             # hr(),
+                             # 
+                             # h4(strong("站点信息")),
+                             
+                             # hr(),
+                             # 
+                             hr(),
+                             h4(strong("站点信息")),
+                             plotlyOutput(outputId = "plottrend") %>% withSpinner(color="#377EB8"),
+                             # hr(),
+                             # 
+                             # h4(strong("趋势分析结果")),
+                             # 
+                             # tableOutput("trendinfo")
+                             
+                             
+                      ),
+                      column(5,
+                             
+                             # sidebarLayout(
+                             #   position = "right",
+                             
+                             
+                             
+                             
+                             #=========================================================================
+                             # 3. main panel for display data
+                             #=========================================================================
+                             # mainPanel(
+                             #   width = 8,
+                             #leafletOutput(outputId = "plotmap", height = 600),
+                             
+                             hr(),
+                             h4(strong("站点时间序列数据表")),
+                             dataTableOutput("table_extract") %>% withSpinner(color="#377EB8"),
+                             
+                             hr(),
+                             h4(strong("站点趋势分析表")),
+                             dataTableOutput("table_trend") %>% withSpinner(color="#377EB8")
+                             
+                             #   ) # end of main panel
+                             #   
+                             #   
+                             #)
+                      )
                     )
+                    
+                    # 
+                    # div(class="outer",
+                    #     
+                    #     tags$head(
+                    #       # Include our custom CSS
+                    #       includeCSS("styles.css"),
+                    #       includeScript("gomap.js")
+                    #     ),
+                    #     
+                    #     absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE,
+                    #                   draggable = TRUE, top = 60, left = "auto", right = 20, bottom = "auto",
+                    #                   width = 600, height = "auto",
+                    #                   
+                    #                   
+                    #                   hr(),
+                    #                   
+                    # 
+                    #     )
+                    #     
+                    # )
+                    
            ),
            
            # TAB 3
            tabPanel("帮助文档",
-                    div(class="outer",
                         
-                        includeMarkdown("README.md")
+                        #includeMarkdown("README.md")
+                        includeHTML("README.html")
                         # dataTableOutput("table1"),
                         #=========================================================================
                         # 2. sider bar panel for outputs
@@ -221,6 +247,6 @@ navbarPage("北京城区通量数据分析程序", id = "nav",
                         #                   
                         #      ),
                         
-                    )
+           
            )
 )

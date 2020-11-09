@@ -36,7 +36,7 @@ server <- function(input, output) {
       # st <- st_transform(st, crs = 4326)
       # print(st)
         
-      newLine <- isolate(data.table(name = "未命名", lng = click$lng, lat = click$lat, dist = input$dist))
+      newLine <- isolate(data.table(name = paste0("未命名站点", nrow(values$table) + 1), lng = round(click$lng, 6), lat = round(click$lat, 6), dist = input$dist))
       print(newLine)
       isolate(values$table <- rbind(values$table, newLine))
     }
@@ -50,7 +50,10 @@ server <- function(input, output) {
                                     autoWidth = TRUE,
                                     ordering = TRUE,
                                     dom = 'Bfrtip',
-                                    buttons = c('csv', 'excel')
+                                    buttons = list(
+                                      list(extend = "csv", text = '<span class="glyphicon glyphicon-download-alt"></span> csv'),
+                                      list(extend = "excel", text = '<span class="glyphicon glyphicon-download"></span> excel')
+                                    )
                                   ),
                                   selection = 'none',
                                   editable = TRUE,
@@ -61,6 +64,7 @@ server <- function(input, output) {
   observeEvent(input$table_cell_edit, {
     values$table[input$table_cell_edit$row,input$table_cell_edit$col] <<- input$table_cell_edit$value
   })
+  
 
   
   
@@ -87,11 +91,22 @@ server <- function(input, output) {
       st_circle <- st_buffer(sf_point, data$dist)%>% 
         st_transform(crs = 4326)
       
+      
+      
+      labs <- lapply(seq(nrow(values$table)), function(i) {
+        paste0( '<p>', "name: ",  values$table[i, "name"], '<p></p>', 
+                '<p>', "lng: ",  values$table[i, "lng"], '<p></p>',
+                '<p>', "lat: ",  values$table[i, "lat"], '<p></p>',
+                '<p>', "dist: ",  values$table[i, "dist"], '<p></p>') 
+      })
+      
       leafletProxy('map')%>%
         addPolylines(data = st_circle, color = "black",
                      weight = 1.5,
                      opacity = 0.8, fillOpacity = 0.2)%>%
-        addMarkers(lng = values$table$lng, lat = values$table$lat)
+        addMarkers(lng = values$table$lng, 
+                   lat = values$table$lat, 
+                   label = lapply(labs, htmltools::HTML))
     }
     
   }
@@ -104,7 +119,8 @@ server <- function(input, output) {
   
   # clear all markers by clearallpoints buttom
   observeEvent(input$clearallpoints, {
-    values$table <- data.table(name = NULL, lng = NULL, lat = NULL, dist = NULL)
+    values$table <- data.table(name = character(), lng = numeric(), lat = numeric(), dist = numeric())
+    
     # cant use update marker fun as it only allows add new marker
     update_marker()
     
@@ -121,10 +137,11 @@ server <- function(input, output) {
     
   })
   
-  
+
   
   # add raster map by deploy the simulatemap buttom
   observeEvent(input$simulatemap,{
+    withProgress(message = '正在加载地图...', value = 50, {
     leafletProxy('map') %>%
       clearImages() %>%
       clearControls() %>%
@@ -134,6 +151,7 @@ server <- function(input, output) {
               input$year,
               input$month,
               input$submonth)
+    })
     
   })
   
@@ -160,11 +178,12 @@ server <- function(input, output) {
   # })
   observeEvent(input$simulatetrend,{
     output$plottrend <- renderPlotly({
-      withProgress(message = '正在处理数据...', value = 0, {
+      withProgress(message = '正在处理数据...', value = 50, {
         
-        plottrend(input$dir,
-                input$vars_trend,
-                values$table)
+        plottrend(isolate(input$dir),
+                isolate(input$vars_trend),
+                isolate(values$table)
+        )
         
       })
     })
@@ -176,7 +195,10 @@ server <- function(input, output) {
                                               autoWidth = TRUE,
                                               ordering = TRUE,
                                               dom = 'Bfrtip',
-                                              buttons = c('csv', 'excel')
+                                              buttons = list(
+                                                list(extend = "csv", text = '<span class="glyphicon glyphicon-download-alt"></span> csv'),
+                                                list(extend = "excel", text = '<span class="glyphicon glyphicon-download"></span> excel')
+                                              )
                                             ),
                                             selection = 'none',
                                             editable = TRUE,
@@ -191,7 +213,10 @@ server <- function(input, output) {
                                             autoWidth = TRUE,
                                             ordering = TRUE,
                                             dom = 'Bfrtip',
-                                            buttons = c('csv', 'excel')
+                                            buttons = list( 
+                                                           list(extend = "csv", text = '<span class="glyphicon glyphicon-download-alt"></span> csv'),
+                                                           list(extend = "excel", text = '<span class="glyphicon glyphicon-download"></span> excel')
+                                            )
                                           ),
                                           selection = 'none',
                                           editable = TRUE,

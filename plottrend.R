@@ -83,7 +83,9 @@ plottrend <- function(dir,
   
   
   # vars
-  name <- variable <- inx <- value <- array(dim = c(length(vars_trend), 2019-2013+1, 24,nrow))
+  inx <- name <- variable <- date <- value <- array(dim = c(length(vars_trend), 2019-2013+1, 24,nrow))
+  
+  
   for(i in seq_along(vars_trend)){
     # year
     for(j in 2013:2019){
@@ -110,16 +112,17 @@ plottrend <- function(dir,
         
         value[i, j-2013+1, k, ] <- raster(fn, band = k)%>%
           exact_extract(st_circle, "mean") %>%
-          as.vector()
+          as.vector() %>%
+          round(6)
         
         variable[i, j-2013+1, k, ] <- vars_trend[i]
         name[i, j-2013+1, k, ] <- table$name
-        inx[i, j-2013+1, k, ] <- paste(j, fix_mon(k), fix_day(k), sep = "")
-        
+        date[i, j-2013+1, k, ] <- paste(j, fix_mon(k), fix_day(k), sep = "")
+        inx[i, j-2013+1, k, ] <- k + (j-2013)*24
         # print(value[i, j-2013+1, k, ])
         # print(variable[i, j-2013+1, k, ])
         # print(name[i, j-2013+1, k, ])
-        # print(inx[i, j-2013+1, k, ])
+        # print(date[i, j-2013+1, k, ])
         # 
         # Sys.sleep()
         
@@ -127,68 +130,85 @@ plottrend <- function(dir,
       }
       nc_close(nc)
     }
+    
+    
+    
+    
   }
   
-  
-  pdf <- data.table(inx = as_date(as.vector(inx)), 
-                    value = as.vector(value), 
-                    variable = as.vector(variable), 
-                    name = as.vector(name)
+  # export extracted data
+  pdf <- data.table(
+    name = as.vector(name),
+    variable = as.vector(variable), 
+    date = as_date(as.vector(date)), 
+    value = as.vector(value)
   )
   fwrite(pdf, "extract.csv")
   
-
-  
-  
-  
-  labels1 <- paste(2013:2019, 1, sep = "-")
-  labels2 <- paste(2013:2019, 6, sep = "-")
-  inx <- 1
-  labels <- ""
-  for(i in seq_along(labels1)){
-    labels[inx] <- labels1[i] 
-    labels[inx + 1] <- labels2[i] 
-    inx <- inx + 2 
-  }
-  
-  # write lm result
-  ave <- pvalue <- r2 <- trend_value <- 0
-  variable <- ""
-  dt <- as.data.table(pdf)
-  for(i in seq_along(vars_trend)){
-    adt <- dt[variable %in% vars_trend[i],]
-    lm_model <- lm(value~inx, adt)
+  # calculate trend
+  dt <- cbind(pdf, inx = as.vector(inx))
+  name <- NULL
+  variable <- ave <- pvalue <- r2 <- trend_value <- name <- matrix(nrow = length(vars_trend), ncol = length(table$name))
+  print("s1")
+  for(i in seq_along(vars_trend))
+    for(j in seq_along(table$name)){
+      
+    adt <- dt[variable == vars_trend[i] & name == table$name[j],]
+    lm_model <- lm(value~inx, adt) # 24 inx in a year
     lm_sum <- summary(lm_model)
     
-    variable[i] <- vars_trend[i]
-    ave[i] <- mean(adt$value)%>%round(3)
-    pvalue[i]  <- lm_sum[["coefficients"]][2,4]%>%round(3)
-    r2[i]  <- lm_sum[["r.squared"]]%>%round(3)
-    trend_value[i]  <- (lm_sum[["coefficients"]][2,1]*24)%>%round(3) #modify for inx
-  }
-  odf <- data.table(variable, ave, trend_value, pvalue)
+    name[i, j] <- table$name[j]
+    variable[i, j] <- vars_trend[i]
+    ave[i, j] <- mean(adt$value)%>%round(3)
+    pvalue[i, j]  <- lm_sum[["coefficients"]][2,4]%>%round(3)
+    r2[i, j]  <- lm_sum[["r.squared"]]%>%round(3)
+    trend_value[i, j]  <- (lm_sum[["coefficients"]][2,1]*24)%>%round(3) # modify for date
+
+    }
+  print("s2")
+  odf <- data.table(
+    name = name %>% as.vector(),
+    variable = variable %>% as.vector(),
+    ave = ave %>% as.vector(),
+    trend_value = trend_value %>% as.vector(),
+    pvalue = pvalue %>% as.vector(),
+    r2 = r2 %>% as.vector()
+    )
   ofn <- paste("trend.csv", sep = "")
   fwrite(odf, ofn)
+  print("s3")
   
   
   p <- ggplot(data = pdf,
-              aes(inx, value, color = name))+
-    geom_point(size = 0.8, alpha = 0.6)+
+              aes(date, value, color = name))+
+    geom_point(size = 1.2, alpha = 0.8)+
     # geom_smooth(method = "lm",
     #             se = FALSE
     # )+
-    labs(x = "Date", y = "")+
-    # scale_x_continuous(breaks = seq(1, 24*7, 12),
-    #                    labels = labels
-    # )+
-    scale_color_brewer(palette='Set1',
+    labs(x = "日期", y = "变量值")+
+    scale_x_continuous(breaks = as_date(paste0(2013:2020, "-01-01"))
+    )+
+    scale_color_manual(values = rev(brewer.pal(length(levels(factor(name))), "Set1")),
                        name = NULL)+
     facet_wrap(.~variable, ncol = 1, scales = "free_y")+
-    theme(legend.position = "none",
-      axis.title.y = element_text(vjust = 0))
+    theme_bw() +
+    theme(
+      plot.title = element_text(face = "bold", size = 12),
+      #legend.background = element_rect(fill = "white", size = 4, colour = "white"),
+      legend.justification = c(0, 1),
+      legend.position = c(0, 1),
+      axis.ticks = element_line(colour = "grey70", size = 0.2),
+      panel.grid.major = element_line(colour = "grey70", size = 0.2),
+      panel.grid.minor = element_blank()
+    )
   
-  p <- ggplotly(p)
-  
+  p <- ggplotly(p)%>%
+    layout(
+      legend = list(orientation = "h",
+                    x = 0,
+                    y = 1),
+      height = 1000
+    )
   
   
   return(p)
@@ -234,13 +254,13 @@ plottrend <- function(dir,
 # df <- matrix(ncol = length(vars_trend),
 #              nrow = length(res)
 # )
-# inx <- 0
+# date <- 0
 # for(i in 1:length(res))
 #   for(j in 1:length(vars_trend)){
 #     df[i, j] <- res[[i]][[j]] 
-#     inx[i] <- i
+#     date[i] <- i
 #   }
 # df <- as.data.frame(df)
 # names(df) <- vars_trend
-# df <- cbind(df, inx)
-# pdf <- melt(df, id.vars = "inx")
+# df <- cbind(df, date)
+# pdf <- melt(df, id.vars = "date")
