@@ -138,12 +138,15 @@ plottrend <- function(dir,
   
   # export extracted data
   pdf <- data.table(
-    name = as.vector(name),
-    variable = as.vector(variable), 
+    name = as.vector(as.character(name)),
+    variable = as.vector(as.character(variable)), 
     date = as_date(as.vector(date)), 
     value = as.vector(value)
   )
+  
   fwrite(pdf, "extract.csv")
+  print(pdf)
+  print(table)
   
   # calculate trend
   dt <- cbind(pdf, inx = as.vector(inx))
