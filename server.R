@@ -65,8 +65,18 @@ server <- function(input, output, session) {
                                   class = "display"
   )
   observeEvent(input$table_cell_edit, {
-
-      values$table[input$table_cell_edit$row,input$table_cell_edit$col] <- as.character(input$table_cell_edit$value)
+    
+    # if(input$table_cell_edit$col == 1){
+    #   print("s1")
+    #   values$table[input$table_cell_edit$row,input$table_cell_edit$col] <- as.character(input$table_cell_edit$value)
+    # }else{
+    #   print("s2")
+      # values$table[input$table_cell_edit$row,input$table_cell_edit$col] <- as.numeric(input$table_cell_edit$value)
+    # }
+    
+    # print(typeof(input$table_cell_edit$value))
+    # fwrite(values$table)
+    values$table[input$table_cell_edit$row,input$table_cell_edit$col] <- input$table_cell_edit$value
     
   })
   

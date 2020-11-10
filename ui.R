@@ -221,7 +221,8 @@ navbarPage("北京城区通量数据分析程序", id = "nav",
            tabPanel("帮助文档",
                     
                     #includeMarkdown("README.md")
-                    includeHTML("help.html")
+                    #includeMarkdown("help.md")
+                    includeHTML("Help.html")
                     # dataTableOutput("table1"),
                     #=========================================================================
                     # 2. sider bar panel for outputs
