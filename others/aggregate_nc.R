@@ -1,4 +1,4 @@
-aggregate_nc <- function(i, infns){
+aggregate_nc <- function(i, infns, fun = mean){
   
   t  <- system.time({
     
@@ -21,7 +21,7 @@ aggregate_nc <- function(i, infns){
     }else{
       r <- raster(fn)
     }
-    rout <- aggregate(r, fact, fun = mean)
+    rout <- aggregate(r, fact, fun = fun)
     
     ofn <- gsub(origin_resolution, new_resolution, fn)
     
@@ -50,27 +50,32 @@ infns <- dir("F:/pml_data/",
              "10m", 
              full.names =  TRUE)
 
-lapply(43:length(infns), aggregate_nc, infns)
+# lapply(43:length(infns), aggregate_nc, infns)
+# 
+# 
+# 
+# 
+# # 1 original: 10 sec
+# # parallel: 16 sec
+# # total costs almost 40 mins
+# ncores <- detectCores(logical=F) # physical cores
+# ncores <- 2
+# cl <- makeCluster(ncores)
+# t  <- system.time({
+#   clusterApply(cl, seq_along(infns), infns, fun = aggregate_nc)
+# })
+# stopCluster(cl)
+# print(t)
 
 
 
 
-# 1 original: 10 sec
-# parallel: 16 sec
-# total costs almost 40 mins
-ncores <- detectCores(logical=F) # physical cores
-ncores <- 2
-cl <- makeCluster(ncores)
-t  <- system.time({
-  clusterApply(cl, seq_along(infns), infns, fun = aggregate_nc)
-})
-stopCluster(cl)
-print(t)
 
 
 
 
-
-
-
-
+# for land cover 
+infns <- dir("F:/pml_data/",
+             "landcover", 
+             full.names =  TRUE)
+lapply(1:length(infns), aggregate_nc, infns, max)

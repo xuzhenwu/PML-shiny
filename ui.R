@@ -1,10 +1,9 @@
 
 navbarPage("北京城区通量数据分析程序", id = "nav",
            
-           
-           
-           
+           #===============================================================
            # TAB 1
+           #===============================================================
            tabPanel("动态地图",
                     
                     #leafletOutput(outputId = "plotmap")
@@ -62,29 +61,38 @@ navbarPage("北京城区通量数据分析程序", id = "nav",
                                         
                                       ),
                                       
-                                      selectInput(inputId = "varname_map",
-                                                  label = "数据类型",
-                                                  choices = choices_var[choices_var != "Rainf"],
-                                                  selected = "ET"
+                                      
+                                      fluidRow(
+                                        
+                                        column(6,
+                                               selectInput(inputId = "varname_map",
+                                                           label = "数据类型",
+                                                           choices = choices_var[choices_var != "Rainf"],
+                                                           selected = "ET"
+                                               )
+                                        ),
+                                        column(6,
+                                               selectInput(inputId = "resolution",
+                                                           label = "重采样 (默认分辨率10m) ",
+                                                           choices = c(10, 30, 100, 500),
+                                                           selected  = 30
+                                               )
+                                        )
                                       ),
+                                      
+                                      
                                       
                                       actionButton("simulatemap", "应用地图绘制", class = "btn-primary"),   
                                       
                                       # abandon resolution
-                                      # sliderInput(inputId = "resolution",
-                                      #             label = "分辨率 (m) ",
-                                      #             min = 10,
-                                      #             max = 100,
-                                      #             step = 10,
-                                      #             value = 10
-                                      # ),
+                                      
                                       
                                       
                                       hr(),
                                       
                                       h4(strong("添加站点信息")),
                                       numericInput(inputId = "dist",
-                                                   label = "站点半径范围 (m)",
+                                                   label = "默认站点半径范围 (m)",
                                                    value = 500),
                                       
                                       dataTableOutput("table"),
@@ -96,8 +104,9 @@ navbarPage("北京城区通量数据分析程序", id = "nav",
                         ),
                         
                         tags$div(id="cite",
-                                 '项目信息: 北京地区高时空分辨率的水热通量数据集构建 
-                                 (最终解释权归中国科学院地理与资源研究所所有)'
+                                 '项目信息: 基于卫星遥感技术的北京地区高分辨率地表水热通量数据集构建
+ 
+                                 (最终权利归中国科学院地理与资源研究所和北京市水科学技术研究院共同所有)'
                         )
                     )
                     

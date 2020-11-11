@@ -10,7 +10,7 @@ plotmap <- function(
   
   
   #debug options
-  # dir <- "F:/pml_data/"
+  # dir <- "data/"
   # varname = "landcover"
   # #varname = "GPP"
   # resolution =  60
@@ -39,18 +39,28 @@ plotmap <- function(
               , full.names = TRUE)
   }
   # read raster file and aggreagate
+  
   r <- raster(fn, band = layer)
   
+  aggregate_inx <- as.numeric(resolution) / 10
+  if(aggregate_inx > 1){
+    if(varname == "landcover")
+      r <- aggregate(r, fact = aggregate_inx, fun = max) # may change as count 
+    else 
+      r <- aggregate(r, fact = aggregate_inx, fun = mean)
+  }
+  
   # pals
-  palette <- c("Spectral", "YlGn", "Set1")
-  pals <- palette[1]
+  palette <- c("Spectral", "YlGn", "Spectral")
   if(varname == "GPP"|
      varname == "LAI"){
     pals <- palette[2]
+    pals <- brewer.pal(9, pals)
   }
-  if(varname == "landcover")
-    pals <- palette[3]
-  pals <- brewer.pal(9, pals)
+  else{
+    pals <- palette[1]
+    pals <- brewer.pal(11, pals)
+  }
   
   # legend
   if(varname != "landcover"){
@@ -60,32 +70,56 @@ plotmap <- function(
     
     r <- ratify(r)
     rat <- levels(r)[[1]]
-    rat$class <- c("Croplands", 
-                   "Mixed Forest", 
-                   "Grasslands", 
-                   "Shrublands", 
-                   "Wetland", 
-                   "Water Bodies", 
-                   "Impervious surface(Urban and Built-Up)", 
-                   "Barren or Sparsely Vegetated")
-    rat$class_chn <- c("农地", 
+    
+    
+    inx <- 1:9
+    class <- c("Croplands", 
+               "Mixed Forest", 
+               "Grasslands", 
+               "Shrublands", 
+               "Wetland",
+               "Water Bodies",
+               "Tundra, Permanent Wetlands",
+               "Impervious surface(Urban and Built-Up)", 
+               "Barren or Sparsely Vegetated")
+    class_chn <- c("农地", 
                    "混合林", 
                    "草地", 
                    "灌丛", 
                    "湿地", 
-                   "水体", 
+                   "水体",
+                   "苔原",
                    "不透水地表", 
                    "裸土")
-    pals[6] <- c("#3708FF")
+    pals <- c("#FAFE03", 
+              "#31A278", 
+              "#FFA800", 
+              "#A84974", 
+              "#008C94", 
+              "#3708FF",
+              "#CAFE8F",#IGBP 没有苔原？
+              "#FF2A00", 
+              "#AAAAAA")
+    
+    pals <- pals[rat$ID]
+    
+    print(rat$ID)
+    rat$class <- class[rat$ID]
+    rat$class_chn <- class_chn[rat$ID]
+    
+    
     
     levels(r) <- rat
-
+    
     
     pal <- colorFactor(pals, values(r),
                        na.color = "transparent")
   }
   
-
+  
+  
+  # legend.title
+  title_label <- paste0(varname, " (", dt_varunit[variables == varname,]$units[1], ") ")
   
   # leaflet
   if(varname != "landcover"){
@@ -95,7 +129,7 @@ plotmap <- function(
       addLegend(pal = pal,
                 position = "bottomleft",
                 values = values(r),
-                title = varname)
+                title = title_label)
   }else{
     p <- map %>%
       addRasterImage(r, colors = pal, opacity = 0.8,
@@ -107,8 +141,8 @@ plotmap <- function(
                 labFormat = labelFormat(transform = function(x){
                   levels(r)[[1]]$class_chn[which(levels(r)[[1]]$ID == x)]
                 }),
-                title = varname)
+                title = title_label)
   }
-
+  
   return(p)
 }

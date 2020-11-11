@@ -4,8 +4,6 @@ server <- function(input, output, session) {
   # dependence.R
   source("plottrend.R", encoding = 'UTF-8')
   source("plotmap.R", encoding = 'UTF-8')
-  source('trend_table.R', encoding = 'UTF-8')
-  
   
   #==============================================================================
   # leaflet related
@@ -37,14 +35,17 @@ server <- function(input, output, session) {
       # print(st)
       
       newLine <- isolate(data.table(name = paste0("未命名站点", nrow(values$table) + 1), lng = round(click$lng, 6), lat = round(click$lat, 6), dist = input$dist))
-      print(newLine)
+      #print(newLine)
       isolate(values$table <- rbind(values$table, newLine))
     }
     
   })
   
   output$table <- renderDataTable({
+    write.csv(values$table, "site.csv")
+    #datatable(values$table, colnames = FALSE)
     values$table
+    
     },
                                   options = list(
                                     paging = TRUE,
@@ -53,6 +54,11 @@ server <- function(input, output, session) {
                                     autoWidth = TRUE,
                                     ordering = TRUE,
                                     dom = 'Bfrtip',
+                                    headerCallback = JS(
+                                      "function(thead, data, start, end, display){",
+                                      "  $(thead).remove();",
+                                      "}"),
+                                    processing=FALSE, 
                                     buttons = list(
                                       list(extend = "csv", text = '<span class="glyphicon glyphicon-download-alt"></span> csv'),
                                       list(extend = "excel", text = '<span class="glyphicon glyphicon-download"></span> excel')
@@ -75,8 +81,12 @@ server <- function(input, output, session) {
     # }
     
     # print(typeof(input$table_cell_edit$value))
+
+    values$table[input$table_cell_edit$row,input$table_cell_edit$col] <- paste0(input$table_cell_edit$value)
+    # str((values$table))
     # fwrite(values$table)
-    values$table[input$table_cell_edit$row,input$table_cell_edit$col] <- input$table_cell_edit$value
+    write.csv(values$table)
+    write.csv(values$table, "site.csv")
     
   })
   
@@ -112,7 +122,7 @@ server <- function(input, output, session) {
         paste0( '<p>', "站点名: ",  values$table[i, "name"], '<p></p>', 
                 '<p>', "经度: ",  values$table[i, "lng"], '<p></p>',
                 '<p>', "纬度: ",  values$table[i, "lat"], '<p></p>',
-                '<p>', "半径范围: ",  values$table[i, "dist"], '<p></p>') 
+                '<p>', "半径范围: ",  values$table[i, "dist"], "m", '<p></p>') 
       })
       
       leafletProxy('map')%>%

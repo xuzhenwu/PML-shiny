@@ -2,17 +2,20 @@ plottrend <- function(dir,
                       vars_trend,
                       table
 ){
-  
-  
+
+
+  # debug option
   # dir <- "F:/pml_data/1500/"
   # vars_trend <- c("GPP", "ET")
-  # lat <- 40.001501  # 地理所
-  # lon <- 116.379168
-  # dist <- 1500 #meter
 
+  table <- fread("site.csv")
+  # cheak if the chinese characters works well
+  # write.csv(table)
+  # print(table)
+  
+  
   dist <- table$dist[1]
   name <- table$name[1]
-  
   nrow <- nrow(table)
   
   #==========================================================================
@@ -25,13 +28,12 @@ plottrend <- function(dir,
   st_circle <- st_buffer(sf_point, table$dist)%>% 
     st_transform(crs = 4326)
   
-  
-  
-  
   # extract the extent to reduce time of reading
   fl <- dir(dir,
             paste("*.nc", sep = ""), 
             full.names = TRUE)
+  
+  # for a smaller region (abandoned)
   # fn <- fl[1]
   # nc <- nc_open(fn)
   # PI <- 3.1415926
@@ -66,7 +68,7 @@ plottrend <- function(dir,
   # 
   # nc_close(nc)
   
-  # funcs
+  # funcs for pasrse k in a year: 1-24
   fix_mon <- function(k){
     x <- floor((k-1)/2)+1
     if(x >= 10)
@@ -80,12 +82,9 @@ plottrend <- function(dir,
     else
       return("01")
   }
-  
-  
-  # vars
+
+  # extract_data
   inx <- name <- variable <- date <- value <- array(dim = c(length(vars_trend), 2019-2013+1, 24,nrow))
-  
-  
   for(i in seq_along(vars_trend)){
     # year
     for(j in 2013:2019){
@@ -95,6 +94,8 @@ plottrend <- function(dir,
       nc <- nc_open(fn)
       # tiles
       for(k in 1:24){
+        
+        # for a smaller region (abandoned)
         # data <- ncvar_get(nc, 
         #                   varid = vars_trend[i], 
         #                   c(start, k), 
@@ -125,17 +126,10 @@ plottrend <- function(dir,
         # print(date[i, j-2013+1, k, ])
         # 
         # Sys.sleep()
-        
-        
       }
       nc_close(nc)
     }
-    
-    
-    
-    
   }
-  
   # export extracted data
   pdf <- data.table(
     name = as.vector(as.character(name)),
@@ -143,16 +137,16 @@ plottrend <- function(dir,
     date = as_date(as.vector(date)), 
     value = as.vector(value)
   )
-  
   fwrite(pdf, "extract.csv")
-  print(pdf)
-  print(table)
+  
+  
+  # print(pdf)
+  # print(table)
   
   # calculate trend
   dt <- cbind(pdf, inx = as.vector(inx))
   name <- NULL
   variable <- ave <- pvalue <- r2 <- trend_value <- name <- matrix(nrow = length(vars_trend), ncol = length(table$name))
-  print("s1")
   for(i in seq_along(vars_trend))
     for(j in seq_along(table$name)){
       
@@ -168,7 +162,6 @@ plottrend <- function(dir,
     trend_value[i, j]  <- (lm_sum[["coefficients"]][2,1]*24)%>%round(3) # modify for date
 
     }
-  print("s2")
   odf <- data.table(
     name = name %>% as.vector(),
     variable = variable %>% as.vector(),
@@ -179,9 +172,22 @@ plottrend <- function(dir,
     )
   ofn <- paste("trend.csv", sep = "")
   fwrite(odf, ofn)
-  print("s3")
+
+  
+  # match units
+  for(i in seq_along(vars_trend)){
+    if(i == 1)
+      units_trend <- dt_varunit[variables == vars_trend[i],]$units[1]
+    else
+      units_trend <- c(units_trend, dt_varunit[variables == vars_trend[i],]$units[1])
+  }
+  str_labels <- paste0(vars_trend, " (", units_trend, ") ")
   
   
+  pdf$variable <- factor(pdf$variable, level = vars_trend, labels = str_labels)
+  
+
+  # ggplot
   p <- ggplot(data = pdf,
               aes(date, value, color = name))+
     geom_point(size = 1.2, alpha = 0.8)+
@@ -191,9 +197,9 @@ plottrend <- function(dir,
     labs(x = "日期", y = "变量值")+
     scale_x_continuous(breaks = as_date(paste0(2013:2020, "-01-01"))
     )+
-    scale_color_manual(values = rev(brewer.pal(length(levels(factor(name))), "Set1")),
+    scale_color_manual(values = rev(brewer.pal(length(levels(factor(pdf$name))), "Set1")),
                        name = NULL)+
-    facet_wrap(.~variable, ncol = 1, scales = "free_y")+
+    facet_wrap(.~variable, ncol = 1, scales = "free_y", labeller = labeller(str_labels))+
     theme_bw() +
     theme(
       plot.title = element_text(face = "bold", size = 12),
@@ -204,7 +210,7 @@ plottrend <- function(dir,
       panel.grid.major = element_line(colour = "grey70", size = 0.2),
       panel.grid.minor = element_blank()
     )
-  
+  # plotly
   p <- ggplotly(p)%>%
     layout(
       legend = list(orientation = "h",
@@ -212,58 +218,7 @@ plottrend <- function(dir,
                     y = 1),
       height = 1000
     )
-  
-  
+
   return(p)
-  #end of trendplot
-}
-
-
-# 
-# 
-# r <- raster(data, xmn = lon_start, xmx = lon_end, ymn = lat_end, ymx = lat_start)
-# value <-exact_extract(r, st_circle, "mean")
-# 
-# # extract vars
-# extract_all <- function(j, fl, st_circle, vars_trend){
-#   
-#   # file names
-#   fl <- dir(dir,
-#             paste(vars_trend[i], ".*.nc", sep = ""), 
-#             full.names = TRUE)
-#   
-#   extract_single <- function(i, fl, st_circle, vars_trend){
-#     
-#     nc <- nc_open(fn)
-#     data <- ncvar_get(nc, 
-#                       varid = vars_trend[i], 
-#                       start, 
-#                       count)
-#     r <- raster(fn, band = 1)
-#     value <-exact_extract(r, st_circle, "mean")
-#     
-#     year <- year
-#   }
-#   res <- lapply(seq_along(vars_trend), extract_single, fl, st_circle, vars_trend)
-#   
-#   names(res) <- vars_trend
-#   return(res)
-# }
-# system.time({
-#   res <- lapply(seq_along(fl), extract_all, fl, st_circle, vars_trend)
-# })
-# names(res) <- fl_name
-# change format
-# df <- matrix(ncol = length(vars_trend),
-#              nrow = length(res)
-# )
-# date <- 0
-# for(i in 1:length(res))
-#   for(j in 1:length(vars_trend)){
-#     df[i, j] <- res[[i]][[j]] 
-#     date[i] <- i
-#   }
-# df <- as.data.frame(df)
-# names(df) <- vars_trend
-# df <- cbind(df, date)
-# pdf <- melt(df, id.vars = "date")
+  
+}# end of trendplot

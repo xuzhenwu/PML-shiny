@@ -38,4 +38,16 @@ choices_var <- c("Ec", "Ei", "Es", "ET",
                  "LE", "Rainf",
                  "Rn", "SWdown", "Tair", "VPD",
                  "landcover")
+
+choices_unit <- c("mm d^-1", "mm d^-1", "mm d^-1", "mm d^-1", 
+                 "umol m^-2 s^-1", "m^2 m^-2",
+                 "LE", "mm",
+                 "W m^-2 s^-1", "W m^-2 s^-1", "°C", "kPa",
+                 "")
+
+
 file_location <- "data/"
+
+dt_varunit <- data.table(variables = choices_var,
+                         inx = seq_along(choices_var),
+                         units = choices_unit)
