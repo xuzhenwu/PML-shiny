@@ -37,7 +37,7 @@ server <- function(input, output, session) {
       newLine <- isolate(data.table(name = paste0("未命名站点", nrow(values$table) + 1), lng = round(click$lng, 6), lat = round(click$lat, 6), dist = input$dist))
       #print(newLine)
       isolate(values$table <- rbind(values$table, newLine))
-      update_marker()
+      #update_marker()
     }
     
   })
@@ -71,6 +71,50 @@ server <- function(input, output, session) {
                                   extensions = 'Buttons',
                                   class = "display"
   )
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  observeEvent(input$table_cell_edit, {
+    
+    # if(input$table_cell_edit$col == 1){
+    #   print("s1")
+    #   values$table[input$table_cell_edit$row,input$table_cell_edit$col] <- as.character(input$table_cell_edit$value)
+    # }else{
+    #   print("s2")
+      # values$table[input$table_cell_edit$row,input$table_cell_edit$col] <- as.numeric(input$table_cell_edit$value)
+    # }
+    
+    # print(typeof(input$table_cell_edit$value))
+
+    values$table[input$table_cell_edit$row,input$table_cell_edit$col] <- paste0(input$table_cell_edit$value)
+    # str((values$table))
+    # fwrite(values$table)
+    write.csv(values$table)
+    write.csv(values$table, "site.csv")
+    #update_marker()
+    
+  })
+  
+  
+  
+  
+  # to see if this pare
+  # observeEvent(input$banking.df_data_cell_edit, {
+  #   d1[input$banking.df_data_cell_edit$row,input$banking.df_data_cell_edit$col] <<- input$banking.df_data_cell_edit$value
+  # })
+  
+  # add marker and buffer circle by clicking
   
   
   update_marker <- function(){
@@ -108,56 +152,13 @@ server <- function(input, output, session) {
     }
     
   }
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  observeEvent(input$table_cell_edit, {
-    
-    # if(input$table_cell_edit$col == 1){
-    #   print("s1")
-    #   values$table[input$table_cell_edit$row,input$table_cell_edit$col] <- as.character(input$table_cell_edit$value)
-    # }else{
-    #   print("s2")
-      # values$table[input$table_cell_edit$row,input$table_cell_edit$col] <- as.numeric(input$table_cell_edit$value)
-    # }
-    
-    # print(typeof(input$table_cell_edit$value))
-
-    values$table[input$table_cell_edit$row,input$table_cell_edit$col] <- paste0(input$table_cell_edit$value)
-    # str((values$table))
-    # fwrite(values$table)
-    write.csv(values$table)
-    write.csv(values$table, "site.csv")
-    update_marker()
-    
-  })
-  
-  
-  
-  
-  # to see if this pare
-  # observeEvent(input$banking.df_data_cell_edit, {
-  #   d1[input$banking.df_data_cell_edit$row,input$banking.df_data_cell_edit$col] <<- input$banking.df_data_cell_edit$value
-  # })
-  
-  # add marker and buffer circle by clicking
-  
  
-  # observeEvent(input$map_click, {
-  #   update_marker()
-  # })
-  # observeEvent(input$table_cell_edit, {
-  #   update_marker()
-  # })
+  observeEvent(input$map_click, {
+    update_marker()
+  })
+  observeEvent(input$table_cell_edit, {
+    update_marker()
+  })
   
   # clear all markers by clearallpoints buttom
   observeEvent(input$clearallpoints, {
